@@ -1,0 +1,1 @@
+import 'package:crypto/crypto.dart'; import 'dart:convert'; void main() { print('testpass1: ' + sha256.convert(utf8.encode('testpass1')).toString()); print('testpass2: ' + sha256.convert(utf8.encode('testpass2')).toString()); }

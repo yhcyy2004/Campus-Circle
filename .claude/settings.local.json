@@ -1,0 +1,38 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(flutter:*)",
+      "Bash(mkdir:*)",
+      "Bash(npm install)",
+      "Bash(npm start)",
+      "Bash(curl:*)",
+      "Bash(mysql:*)",
+      "Bash(taskkill:*)",
+      "Bash(node:*)",
+      "Bash(dart:*)",
+      "Bash(\".\\build\\windows\\x64\\runner\\Debug\\campus_circle.exe\")",
+      "Bash(dir)",
+      "Bash(timeout:*)",
+      "Bash(dir:*)",
+      "Bash(scp:*)",
+      "Bash(ssh:*)",
+      "Read(//d/**)",
+      "Bash(cmd /c taskkill:*)",
+      "Bash(cmd /c:*)",
+      "Bash(set PORT=8081)",
+      "Bash(git add:*)",
+      "Bash(del nul)",
+      "Bash(rm:*)",
+      "Bash(git commit:*)",
+      "Bash(gh repo create:*)",
+      "Bash(git remote add:*)",
+      "Bash(git remote set-url:*)",
+      "Bash(git push:*)",
+      "Bash(git rm:*)",
+      "Bash(git init:*)",
+      "Bash(git reset:*)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}
