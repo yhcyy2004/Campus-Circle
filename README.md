@@ -260,8 +260,7 @@ flutter build ios
 ## 联系方式
 
 - 项目维护者：校园圈开发团队
-- 邮箱：support@campus-circle.com
-- 官网：https://campus-circle.com
+- 邮箱：2827766545@qq.com
 
 ## 致谢
 
