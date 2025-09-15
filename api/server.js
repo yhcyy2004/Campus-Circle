@@ -15,6 +15,14 @@ app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
+// 静态文件服务
+app.use(express.static(__dirname));
+
+// 根路径提供 index.html
+app.get('/', (req, res) => {
+  res.sendFile(__dirname + '/index.html');
+});
+
 // MySQL数据库连接配置
 const dbConfig = {
   host: process.env.DB_HOST || '43.138.4.157',
@@ -617,6 +625,8 @@ app.get('/api/v1/sections', async (req, res) => {
   try {
     const { page = 1, limit = 20, status = 1 } = req.query;
     const offset = (parseInt(page) - 1) * parseInt(limit);
+    const limitValue = parseInt(limit);
+    const statusValue = parseInt(status);
 
     const [sections] = await pool.execute(
       `SELECT s.*, u.nickname as creator_name 
@@ -624,13 +634,13 @@ app.get('/api/v1/sections', async (req, res) => {
        LEFT JOIN users u ON s.creator_id = u.id 
        WHERE s.status = ? 
        ORDER BY s.sort_order DESC, s.created_at DESC 
-       LIMIT ? OFFSET ?`,
-      [status, limit, offset]
+       LIMIT ${limitValue} OFFSET ${offset}`,
+      [statusValue]
     );
 
     const [countResult] = await pool.execute(
       'SELECT COUNT(*) as total FROM sections WHERE status = ?',
-      [status]
+      [statusValue]
     );
 
     res.json({
