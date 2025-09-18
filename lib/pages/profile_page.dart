@@ -4,6 +4,9 @@ import '../utils/constants.dart';
 import '../services/auth_service.dart';
 import '../config/app_routes.dart';
 import '../utils/helpers.dart';
+import '../theme/app_theme.dart';
+import '../widgets/app_widgets.dart';
+import '../animations/app_animations.dart';
 
 class ProfilePage extends StatefulWidget {
   const ProfilePage({super.key});
@@ -60,253 +63,368 @@ class _ProfilePageState extends State<ProfilePage> {
     final userProfile = _authService.currentUserProfile;
 
     return Scaffold(
-      backgroundColor: AppConstants.backgroundColor,
-      appBar: AppBar(
-        title: const Text('我的'),
-        backgroundColor: AppConstants.primaryColor,
-        foregroundColor: Colors.white,
-        elevation: 0,
-      ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(AppConstants.paddingLarge),
-        child: Column(
-          children: [
-            const SizedBox(height: 40),
-            
-            // 用户头像和信息
-            _buildUserInfo(user, userProfile),
-            
-            const SizedBox(height: 40),
-            
-            // 功能列表
-            _buildFeatureList(),
-            
-            const SizedBox(height: 40),
-            
-            // 登出按钮
-            _buildLogoutButton(),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildUserInfo(user, userProfile) {
-    return Container(
-      padding: const EdgeInsets.all(AppConstants.paddingLarge),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(AppConstants.radiusLarge),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.05),
-            blurRadius: 10,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
-      child: Column(
-        children: [
-          // 头像
-          CircleAvatar(
-            radius: 40,
-            backgroundColor: AppConstants.primaryColor,
-            child: user?.avatarUrl != null
-                ? ClipRRect(
-                    borderRadius: BorderRadius.circular(40),
-                    child: Image.network(
-                      user!.avatarUrl!,
-                      width: 80,
-                      height: 80,
-                      fit: BoxFit.cover,
-                      errorBuilder: (context, error, stackTrace) => 
-                          const Icon(Icons.person, size: 40, color: Colors.white),
-                    ),
-                  )
-                : const Icon(Icons.person, size: 40, color: Colors.white),
-          ),
-          
-          const SizedBox(height: 16),
-          
-          // 用户昵称
-          Text(
-            user?.nickname ?? '未登录用户',
-            style: const TextStyle(
-              fontSize: AppConstants.fontSizeXLarge,
-              fontWeight: FontWeight.bold,
-              color: AppConstants.textPrimaryColor,
-            ),
-          ),
-          
-          const SizedBox(height: 8),
-          
-          // 学号和邮箱
-          if (user != null) ...[
-            Text(
-              '学号: ${user.studentNumber}',
-              style: const TextStyle(
-                fontSize: AppConstants.fontSizeMedium,
-                color: AppConstants.textSecondaryColor,
-              ),
-            ),
-            const SizedBox(height: 4),
-            Text(
-              '邮箱: ${user.email}',
-              style: const TextStyle(
-                fontSize: AppConstants.fontSizeMedium,
-                color: AppConstants.textSecondaryColor,
-              ),
-            ),
-          ],
-          
-          // 用户等级和积分
-          if (userProfile != null) ...[
-            const SizedBox(height: 12),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+      body: AppWidget.gradientBackground(
+        child: SafeArea(
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.all(24),
+            child: Column(
               children: [
-                _buildStatItem('等级', '${userProfile.level}'),
-                _buildStatItem('积分', '${userProfile.totalPoints}'),
-                _buildStatItem('帖子', '${userProfile.postsCount}'),
+                const SizedBox(height: 20),
+                
+                // 标题
+                AppAnimations.fadeIn(
+                  delay: 0.1,
+                  child: _buildTitle(),
+                ),
+                
+                const SizedBox(height: 30),
+                
+                // 用户信息卡片
+                AppAnimations.slideIn(
+                  delay: 0.2,
+                  child: _buildUserCard(user, userProfile),
+                ),
+                
+                const SizedBox(height: 24),
+                
+                // 统计数据
+                AppAnimations.scaleIn(
+                  delay: 0.3,
+                  child: _buildStatsCard(userProfile),
+                ),
+                
+                const SizedBox(height: 24),
+                
+                // 功能菜单
+                AppAnimations.slideIn(
+                  delay: 0.4,
+                  child: _buildMenuCard(),
+                ),
+                
+                const SizedBox(height: 32),
+                
+                // 登出按钮
+                AppAnimations.fadeIn(
+                  delay: 0.5,
+                  child: _buildLogoutButton(),
+                ),
               ],
             ),
-          ],
-        ],
+          ),
+        ),
       ),
     );
   }
 
-  Widget _buildStatItem(String label, String value) {
-    return Column(
+  Widget _buildTitle() {
+    return Row(
       children: [
-        Text(
-          value,
-          style: const TextStyle(
-            fontSize: AppConstants.fontSizeLarge,
-            fontWeight: FontWeight.bold,
-            color: AppConstants.primaryColor,
-          ),
+        AppWidget.glowIcon(
+          icon: Icons.account_circle,
+          size: 32,
+          color: AppTheme.primaryColor,
         ),
-        const SizedBox(height: 4),
+        const SizedBox(width: 12),
         Text(
-          label,
-          style: const TextStyle(
-            fontSize: AppConstants.fontSizeSmall,
-            color: AppConstants.textSecondaryColor,
+          '个人中心',
+          style: TextStyle(
+            fontSize: 24,
+            fontWeight: FontWeight.bold,
+            color: AppTheme.textPrimary,
+            shadows: [
+              Shadow(
+                color: AppTheme.primaryColor.withOpacity(0.3),
+                blurRadius: 8,
+              ),
+            ],
           ),
         ),
       ],
     );
   }
 
-  Widget _buildFeatureList() {
-    return Container(
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(AppConstants.radiusLarge),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.05),
-            blurRadius: 10,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
+  Widget _buildUserCard(user, userProfile) {
+    return AppWidget.glassCard(
+      padding: const EdgeInsets.all(24),
       child: Column(
         children: [
-          _buildFeatureItem(
-            icon: Icons.person,
+          // 头像
+          Container(
+            width: 100,
+            height: 100,
+            decoration: BoxDecoration(
+              gradient: AppTheme.primaryGradient,
+              borderRadius: BorderRadius.circular(25),
+              boxShadow: [
+                BoxShadow(
+                  color: AppTheme.primaryColor.withOpacity(0.4),
+                  blurRadius: 20,
+                  spreadRadius: 2,
+                ),
+              ],
+            ),
+            child: user?.avatarUrl != null
+                ? ClipRRect(
+                    borderRadius: BorderRadius.circular(25),
+                    child: Image.network(
+                      user!.avatarUrl!,
+                      width: 100,
+                      height: 100,
+                      fit: BoxFit.cover,
+                      errorBuilder: (context, error, stackTrace) => 
+                          const Icon(Icons.person, size: 50, color: Colors.white),
+                    ),
+                  )
+                : const Icon(Icons.person, size: 50, color: Colors.white),
+          ),
+          
+          const SizedBox(height: 20),
+          
+          // 用户昵称
+          Text(
+            user?.nickname ?? '未登录用户',
+            style: TextStyle(
+              fontSize: 22,
+              fontWeight: FontWeight.bold,
+              color: AppTheme.textPrimary,
+            ),
+          ),
+          
+          const SizedBox(height: 12),
+          
+          // 用户信息
+          if (user != null) ...[
+            _buildInfoRow(Icons.badge, '学号', user.studentNumber),
+            const SizedBox(height: 8),
+            _buildInfoRow(Icons.email, '邮箱', user.email),
+            const SizedBox(height: 8),
+            _buildInfoRow(Icons.school, '专业', user.major),
+            const SizedBox(height: 8),
+            _buildInfoRow(Icons.calendar_today, '年级', '${user.grade}级'),
+          ],
+        ],
+      ),
+    );
+  }
+
+  Widget _buildInfoRow(IconData icon, String label, String value) {
+    return Row(
+      children: [
+        Icon(
+          icon,
+          size: 16,
+          color: AppTheme.textSecondary,
+        ),
+        const SizedBox(width: 8),
+        Text(
+          '$label: ',
+          style: TextStyle(
+            fontSize: 14,
+            color: AppTheme.textSecondary,
+          ),
+        ),
+        Expanded(
+          child: Text(
+            value,
+            style: TextStyle(
+              fontSize: 14,
+              color: AppTheme.textPrimary,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildStatsCard(userProfile) {
+    if (userProfile == null) return const SizedBox();
+    
+    return AppWidget.glassCard(
+      padding: const EdgeInsets.all(20),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+        children: [
+          _buildStatItem(Icons.star, '等级', '${userProfile.level}'),
+          _buildVerticalDivider(),
+          _buildStatItem(Icons.score, '积分', '${userProfile.totalPoints}'),
+          _buildVerticalDivider(),
+          _buildStatItem(Icons.article, '帖子', '${userProfile.postsCount}'),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildStatItem(IconData icon, String label, String value) {
+    return Column(
+      children: [
+        Container(
+          padding: const EdgeInsets.all(8),
+          decoration: BoxDecoration(
+            gradient: AppTheme.primaryGradient,
+            borderRadius: BorderRadius.circular(12),
+            boxShadow: [
+              BoxShadow(
+                color: AppTheme.primaryColor.withOpacity(0.3),
+                blurRadius: 8,
+                spreadRadius: 1,
+              ),
+            ],
+          ),
+          child: Icon(
+            icon,
+            color: Colors.white,
+            size: 20,
+          ),
+        ),
+        const SizedBox(height: 8),
+        Text(
+          value,
+          style: TextStyle(
+            fontSize: 18,
+            fontWeight: FontWeight.bold,
+            color: AppTheme.primaryColor,
+          ),
+        ),
+        const SizedBox(height: 4),
+        Text(
+          label,
+          style: TextStyle(
+            fontSize: 12,
+            color: AppTheme.textSecondary,
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildVerticalDivider() {
+    return Container(
+      width: 1,
+      height: 40,
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          colors: [
+            Colors.transparent,
+            AppTheme.primaryColor.withOpacity(0.3),
+            Colors.transparent,
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildMenuCard() {
+    return AppWidget.glassCard(
+      padding: const EdgeInsets.all(16),
+      child: Column(
+        children: [
+          _buildMenuItem(
+            icon: Icons.person_outline,
             title: '查看个人资料',
-            onTap: () {
-              context.push(AppRoutes.profileDetail);
-            },
+            subtitle: '查看完整的个人信息',
+            onTap: () => context.push(AppRoutes.profileDetail),
           ),
-          _buildDivider(),
-          _buildFeatureItem(
-            icon: Icons.edit,
+          AppWidget.neonDivider(margin: const EdgeInsets.symmetric(vertical: 8)),
+          _buildMenuItem(
+            icon: Icons.edit_outlined,
             title: '编辑资料',
-            onTap: () {
-              context.push(AppRoutes.editProfile);
-            },
+            subtitle: '修改个人信息和头像',
+            onTap: () => context.push(AppRoutes.editProfile),
           ),
-          _buildDivider(),
-          _buildFeatureItem(
-            icon: Icons.settings,
+          AppWidget.neonDivider(margin: const EdgeInsets.symmetric(vertical: 8)),
+          _buildMenuItem(
+            icon: Icons.settings_outlined,
             title: '设置',
-            onTap: () {
-              // TODO: 导航到设置页面
-              Helpers.showToast(context, '功能开发中');
-            },
+            subtitle: '应用设置和偏好',
+            onTap: () => Helpers.showToast(context, '功能开发中'),
           ),
-          _buildDivider(),
-          _buildFeatureItem(
-            icon: Icons.help,
+          AppWidget.neonDivider(margin: const EdgeInsets.symmetric(vertical: 8)),
+          _buildMenuItem(
+            icon: Icons.help_outline,
             title: '帮助与反馈',
-            onTap: () {
-              // TODO: 导航到帮助页面
-              Helpers.showToast(context, '功能开发中');
-            },
+            subtitle: '获取帮助或提供反馈',
+            onTap: () => Helpers.showToast(context, '功能开发中'),
           ),
         ],
       ),
     );
   }
 
-  Widget _buildFeatureItem({
+  Widget _buildMenuItem({
     required IconData icon,
     required String title,
+    required String subtitle,
     required VoidCallback onTap,
   }) {
-    return ListTile(
-      leading: Icon(
-        icon,
-        color: AppConstants.primaryColor,
-      ),
-      title: Text(
-        title,
-        style: const TextStyle(
-          fontSize: AppConstants.fontSizeMedium,
-          color: AppConstants.textPrimaryColor,
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(12),
+      child: Padding(
+        padding: const EdgeInsets.all(12),
+        child: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                gradient: AppTheme.primaryGradient,
+                borderRadius: BorderRadius.circular(12),
+                boxShadow: [
+                  BoxShadow(
+                    color: AppTheme.primaryColor.withOpacity(0.3),
+                    blurRadius: 8,
+                    spreadRadius: 1,
+                  ),
+                ],
+              ),
+              child: Icon(
+                icon,
+                color: Colors.white,
+                size: 20,
+              ),
+            ),
+            const SizedBox(width: 16),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
+                      color: AppTheme.textPrimary,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    subtitle,
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: AppTheme.textSecondary,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            Icon(
+              Icons.chevron_right,
+              color: AppTheme.textTertiary,
+              size: 20,
+            ),
+          ],
         ),
       ),
-      trailing: const Icon(
-        Icons.chevron_right,
-        color: AppConstants.textSecondaryColor,
-      ),
-      onTap: onTap,
-    );
-  }
-
-  Widget _buildDivider() {
-    return const Divider(
-      height: 1,
-      indent: 16,
-      endIndent: 16,
-      color: AppConstants.backgroundColor,
     );
   }
 
   Widget _buildLogoutButton() {
-    return SizedBox(
-      width: double.infinity,
-      child: ElevatedButton(
-        onPressed: _handleLogout,
-        style: ElevatedButton.styleFrom(
-          backgroundColor: AppConstants.errorColor,
-          foregroundColor: Colors.white,
-          padding: const EdgeInsets.symmetric(vertical: 16),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(AppConstants.radiusMedium),
-          ),
-        ),
-        child: const Text(
-          '登出',
-          style: TextStyle(
-            fontSize: AppConstants.fontSizeLarge,
-            fontWeight: FontWeight.w600,
-          ),
-        ),
-      ),
+    return AppWidget.gradientButton(
+      text: '安全登出',
+      onPressed: _handleLogout,
+      height: 52,
     );
   }
 }

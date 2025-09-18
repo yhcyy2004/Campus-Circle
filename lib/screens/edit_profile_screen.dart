@@ -5,6 +5,9 @@ import '../services/api_service.dart';
 import '../models/user_model.dart';
 import '../utils/constants.dart';
 import '../utils/helpers.dart';
+import '../theme/app_theme.dart';
+import '../widgets/app_widgets.dart';
+import '../animations/app_animations.dart';
 
 class EditProfileScreen extends StatefulWidget {
   const EditProfileScreen({super.key});
@@ -183,84 +186,155 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppConstants.backgroundColor,
-      appBar: AppBar(
-        title: Row(
-          children: [
-            Text(_saveSuccess ? '保存成功' : '编辑资料'),
-            if (_saveSuccess) ...[
-              const SizedBox(width: 8),
-              const Icon(Icons.check_circle, color: Colors.green, size: 20),
-            ],
-          ],
-        ),
-        backgroundColor: AppConstants.primaryColor,
-        foregroundColor: Colors.white,
-        elevation: 0,
-        actions: [
-          if (_isLoading)
-            const Center(
-              child: Padding(
-                padding: EdgeInsets.all(16.0),
-                child: SizedBox(
-                  width: 20,
-                  height: 20,
-                  child: CircularProgressIndicator(
-                    strokeWidth: 2,
-                    valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+      body: AppWidget.gradientBackground(
+        child: SafeArea(
+          child: Column(
+            children: [
+              // 自定义AppBar
+              _buildCustomAppBar(context),
+              
+              // 内容区域
+              Expanded(
+                child: Form(
+                  key: _formKey,
+                  child: SingleChildScrollView(
+                    padding: const EdgeInsets.all(24),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        // 头像部分
+                        AppAnimations.scaleIn(
+                          delay: 0.1,
+                          child: _buildAvatarSection(),
+                        ),
+                        
+                        const SizedBox(height: 24),
+                        
+                        // 基本信息
+                        AppAnimations.slideIn(
+                          delay: 0.2,
+                          child: _buildBasicInfoSection(),
+                        ),
+                        
+                        const SizedBox(height: 24),
+                        
+                        // 个人描述
+                        AppAnimations.fadeIn(
+                          delay: 0.3,
+                          child: _buildBioSection(),
+                        ),
+                        
+                        const SizedBox(height: 24),
+                        
+                        // 兴趣爱好
+                        AppAnimations.slideIn(
+                          delay: 0.4,
+                          child: _buildInterestsSection(),
+                        ),
+                        
+                        const SizedBox(height: 24),
+                        
+                        // 社交信息
+                        AppAnimations.fadeIn(
+                          delay: 0.5,
+                          child: _buildSocialSection(),
+                        ),
+                        
+                        const SizedBox(height: 32),
+                        
+                        // 保存按钮
+                        AppAnimations.scaleIn(
+                          delay: 0.6,
+                          child: _buildSaveButton(),
+                        ),
+                        
+                        const SizedBox(height: 40),
+                      ],
+                    ),
                   ),
                 ),
               ),
-            )
-          else
-            TextButton(
-              onPressed: _saveSuccess ? null : _saveProfile,
-              child: Text(
-                _saveSuccess ? '已保存' : '保存',
-                style: TextStyle(
-                  color: _saveSuccess ? Colors.green : Colors.white,
-                  fontSize: AppConstants.fontSizeMedium,
-                  fontWeight: FontWeight.w600,
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildCustomAppBar(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      child: Row(
+        children: [
+          Container(
+            decoration: BoxDecoration(
+              gradient: AppTheme.primaryGradient,
+              borderRadius: BorderRadius.circular(12),
+              boxShadow: [
+                BoxShadow(
+                  color: AppTheme.primaryColor.withOpacity(0.3),
+                  blurRadius: 8,
+                  spreadRadius: 1,
+                ),
+              ],
+            ),
+            child: IconButton(
+              icon: const Icon(Icons.arrow_back, color: Colors.white),
+              onPressed: () => context.pop(),
+            ),
+          ),
+          const SizedBox(width: 16),
+          Expanded(
+            child: Row(
+              children: [
+                Text(
+                  _saveSuccess ? '保存成功' : '编辑档案',
+                  style: TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                    color: AppTheme.textPrimary,
+                    shadows: [
+                      Shadow(
+                        color: AppTheme.primaryColor.withOpacity(0.3),
+                        blurRadius: 8,
+                      ),
+                    ],
+                  ),
+                ),
+                if (_saveSuccess) ...[
+                  const SizedBox(width: 8),
+                  Icon(
+                    Icons.check_circle,
+                    color: AppTheme.accentColor,
+                    size: 20,
+                  ),
+                ],
+              ],
+            ),
+          ),
+          if (_isLoading)
+            Container(
+              padding: const EdgeInsets.all(12),
+              child: SizedBox(
+                width: 20,
+                height: 20,
+                child: CircularProgressIndicator(
+                  strokeWidth: 2,
+                  valueColor: AlwaysStoppedAnimation<Color>(AppTheme.primaryColor),
                 ),
               ),
             ),
         ],
       ),
-      body: Form(
-        key: _formKey,
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(AppConstants.paddingLarge),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              // 头像部分
-              _buildAvatarSection(),
-              
-              const SizedBox(height: 32),
-              
-              // 基本信息
-              _buildBasicInfoSection(),
-              
-              const SizedBox(height: 32),
-              
-              // 个人描述
-              _buildBioSection(),
-              
-              const SizedBox(height: 32),
-              
-              // 兴趣爱好
-              _buildInterestsSection(),
-              
-              const SizedBox(height: 32),
-              
-              // 社交信息
-              _buildSocialSection(),
-              
-              const SizedBox(height: 40),
-            ],
-          ),
-        ),
-      ),
+    );
+  }
+
+  Widget _buildSaveButton() {
+    return AppWidget.gradientButton(
+      text: _saveSuccess ? '已保存' : '保存更改',
+      onPressed: _saveSuccess ? () {} : _saveProfile,
+      isLoading: _isLoading,
+      height: 52,
     );
   }
 

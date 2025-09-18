@@ -4,6 +4,7 @@ import 'services/storage_service.dart';
 import 'services/api_service.dart';
 import 'services/auth_service.dart';
 import 'utils/constants.dart';
+import 'theme/app_theme.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -25,40 +26,9 @@ class CampusCircleApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp.router(
       title: AppConstants.appName,
-      theme: _buildTheme(),
+      theme: AppTheme.getTheme(),
       routerConfig: AppRoutes.router,
       debugShowCheckedModeBanner: false,
-    );
-  }
-
-  ThemeData _buildTheme() {
-    return ThemeData(
-      useMaterial3: true,
-      colorScheme: ColorScheme.fromSeed(
-        seedColor: AppConstants.primaryColor,
-        brightness: Brightness.light,
-      ),
-      // fontFamily: 'PingFang', // 字体文件不存在，先注释掉
-      appBarTheme: const AppBarTheme(
-        centerTitle: true,
-        elevation: 0,
-        scrolledUnderElevation: 0,
-      ),
-      elevatedButtonTheme: ElevatedButtonThemeData(
-        style: ElevatedButton.styleFrom(
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
-          ),
-          minimumSize: const Size(double.infinity, 48),
-        ),
-      ),
-      inputDecorationTheme: InputDecorationTheme(
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-        ),
-        filled: true,
-        fillColor: Colors.grey[50],
-      ),
     );
   }
 }

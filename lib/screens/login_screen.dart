@@ -5,6 +5,9 @@ import '../config/app_routes.dart';
 import '../utils/constants.dart';
 import '../utils/validators.dart';
 import '../utils/helpers.dart';
+import '../theme/app_theme.dart';
+import '../widgets/app_widgets.dart';
+import '../animations/app_animations.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -74,38 +77,56 @@ class _LoginScreenState extends State<LoginScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppConstants.backgroundColor,
-      body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(AppConstants.paddingLarge),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              const SizedBox(height: 60),
-              
-              // Logo和标题
-              _buildHeader(),
-              
-              const SizedBox(height: 60),
-              
-              // 登录表单
-              _buildLoginForm(),
-              
-              const SizedBox(height: 24),
-              
-              // 登录按钮
-              _buildLoginButton(),
-              
-              const SizedBox(height: 16),
-              
-              // 注册链接
-              _buildRegisterLink(),
-              
-              const SizedBox(height: 40),
-              
-              // 其他登录方式
-              _buildOtherLogin(),
-            ],
+      body: AppWidget.gradientBackground(
+        child: SafeArea(
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.all(24),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                const SizedBox(height: 40),
+                
+                // Logo和标题
+                AppAnimations.fadeIn(
+                  delay: 0.2,
+                  child: _buildHeader(),
+                ),
+                
+                const SizedBox(height: 50),
+                
+                // 登录表单卡片
+                AppAnimations.slideIn(
+                  delay: 0.4,
+                  child: AppWidget.glassCard(
+                    padding: const EdgeInsets.all(24),
+                    child: Column(
+                      children: [
+                        _buildLoginForm(),
+                        const SizedBox(height: 24),
+                        _buildLoginButton(),
+                      ],
+                    ),
+                  ),
+                ),
+                
+                const SizedBox(height: 24),
+                
+                // 注册链接
+                AppAnimations.fadeIn(
+                  delay: 0.6,
+                  child: _buildRegisterLink(),
+                ),
+                
+                const SizedBox(height: 32),
+                
+                // 其他登录方式
+                AppAnimations.slideIn(
+                  delay: 0.8,
+                  begin: const Offset(0, 0.5),
+                  child: _buildOtherLogin(),
+                ),
+              ],
+            ),
           ),
         ),
       ),
@@ -116,38 +137,45 @@ class _LoginScreenState extends State<LoginScreen> {
     return Column(
       children: [
         Container(
-          width: 80,
-          height: 80,
+          width: 100,
+          height: 100,
           decoration: BoxDecoration(
-            color: AppConstants.primaryColor,
-            borderRadius: BorderRadius.circular(20),
+            gradient: AppTheme.primaryGradient,
+            borderRadius: BorderRadius.circular(25),
             boxShadow: [
               BoxShadow(
-                color: AppConstants.primaryColor.withOpacity(0.3),
-                blurRadius: 20,
-                offset: const Offset(0, 10),
+                color: AppTheme.primaryColor.withOpacity(0.5),
+                blurRadius: 25,
+                spreadRadius: 5,
+                offset: const Offset(0, 8),
               ),
             ],
           ),
-          child: const Icon(
-            Icons.school,
-            size: 40,
+          child: AppWidget.glowIcon(
+            icon: Icons.rocket_launch,
+            size: 50,
             color: Colors.white,
           ),
         ),
-        const SizedBox(height: 24),
+        const SizedBox(height: 32),
         Text(
-          '欢迎回来',
-          style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+          '欢迎回到未来',
+          style: Theme.of(context).textTheme.displaySmall?.copyWith(
             fontWeight: FontWeight.bold,
-            color: AppConstants.textPrimaryColor,
+            color: AppTheme.textPrimary,
+            shadows: [
+              Shadow(
+                color: AppTheme.primaryColor.withOpacity(0.5),
+                blurRadius: 10,
+              ),
+            ],
           ),
         ),
-        const SizedBox(height: 8),
+        const SizedBox(height: 12),
         Text(
-          '登录你的校园圈账号',
+          '连接校园数字世界',
           style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-            color: AppConstants.textSecondaryColor,
+            color: AppTheme.textSecondary,
           ),
         ),
       ],
@@ -160,13 +188,11 @@ class _LoginScreenState extends State<LoginScreen> {
       child: Column(
         children: [
           // 账号输入框
-          TextFormField(
+          AppWidget.neonTextField(
             controller: _accountController,
-            decoration: const InputDecoration(
-              labelText: '学号或邮箱',
-              hintText: '请输入学号或zzuli.edu.cn邮箱',
-              prefixIcon: Icon(Icons.person_outline),
-            ),
+            label: '账号',
+            hint: '学号或邮箱',
+            prefixIcon: Icons.account_circle_outlined,
             keyboardType: TextInputType.emailAddress,
             textInputAction: TextInputAction.next,
             validator: (value) {
@@ -180,27 +206,26 @@ class _LoginScreenState extends State<LoginScreen> {
           const SizedBox(height: 20),
           
           // 密码输入框
-          TextFormField(
+          AppWidget.neonTextField(
             controller: _passwordController,
-            decoration: InputDecoration(
-              labelText: '密码',
-              hintText: '请输入密码',
-              prefixIcon: const Icon(Icons.lock_outline),
-              suffixIcon: IconButton(
-                icon: Icon(
-                  _obscurePassword ? Icons.visibility : Icons.visibility_off,
-                ),
-                onPressed: () {
-                  setState(() {
-                    _obscurePassword = !_obscurePassword;
-                  });
-                },
-              ),
-            ),
+            label: '密码',
+            hint: '请输入密码',
+            prefixIcon: Icons.lock_outline,
             obscureText: _obscurePassword,
             textInputAction: TextInputAction.done,
             validator: Validators.validatePassword,
             onFieldSubmitted: (_) => _handleLogin(),
+            suffixIcon: IconButton(
+              icon: Icon(
+                _obscurePassword ? Icons.visibility : Icons.visibility_off,
+                color: AppTheme.textSecondary,
+              ),
+              onPressed: () {
+                setState(() {
+                  _obscurePassword = !_obscurePassword;
+                });
+              },
+            ),
           ),
         ],
       ),
@@ -208,29 +233,11 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   Widget _buildLoginButton() {
-    return ElevatedButton(
-      onPressed: _isLoading ? null : _handleLogin,
-      style: ElevatedButton.styleFrom(
-        backgroundColor: AppConstants.primaryColor,
-        foregroundColor: Colors.white,
-        padding: const EdgeInsets.symmetric(vertical: 16),
-      ),
-      child: _isLoading
-          ? const SizedBox(
-              height: 20,
-              width: 20,
-              child: CircularProgressIndicator(
-                strokeWidth: 2,
-                valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-              ),
-            )
-          : const Text(
-              '登录',
-              style: TextStyle(
-                fontSize: AppConstants.fontSizeLarge,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
+    return AppWidget.gradientButton(
+      text: '登录系统',
+      onPressed: _handleLogin,
+      isLoading: _isLoading,
+      height: 52,
     );
   }
 
@@ -241,18 +248,24 @@ class _LoginScreenState extends State<LoginScreen> {
         Text(
           '还没有账号？',
           style: TextStyle(
-            color: AppConstants.textSecondaryColor,
-            fontSize: AppConstants.fontSizeMedium,
+            color: AppTheme.textSecondary,
+            fontSize: 14,
           ),
         ),
         TextButton(
           onPressed: () => context.go(AppRoutes.register),
-          child: const Text(
-            '立即注册',
+          child: Text(
+            '创建账号',
             style: TextStyle(
-              color: AppConstants.primaryColor,
-              fontSize: AppConstants.fontSizeMedium,
+              color: AppTheme.primaryColor,
+              fontSize: 14,
               fontWeight: FontWeight.w600,
+              shadows: [
+                Shadow(
+                  color: AppTheme.primaryColor.withOpacity(0.3),
+                  blurRadius: 4,
+                ),
+              ],
             ),
           ),
         ),
@@ -263,35 +276,27 @@ class _LoginScreenState extends State<LoginScreen> {
   Widget _buildOtherLogin() {
     return Column(
       children: [
-        Row(
-          children: [
-            const Expanded(child: Divider()),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              child: Text(
-                '或者',
-                style: TextStyle(
-                  color: AppConstants.textSecondaryColor,
-                  fontSize: AppConstants.fontSizeSmall,
-                ),
-              ),
-            ),
-            const Expanded(child: Divider()),
-          ],
+        AppWidget.neonDivider(
+          margin: const EdgeInsets.symmetric(vertical: 20),
         ),
-        
-        const SizedBox(height: 20),
         
         TextButton(
           onPressed: () {
             // TODO: 实现忘记密码功能
             Helpers.showToast(context, '功能开发中');
           },
-          child: const Text(
+          child: Text(
             '忘记密码？',
             style: TextStyle(
-              color: AppConstants.primaryColor,
-              fontSize: AppConstants.fontSizeMedium,
+              color: AppTheme.accentColor,
+              fontSize: 14,
+              fontWeight: FontWeight.w500,
+              shadows: [
+                Shadow(
+                  color: AppTheme.accentColor.withOpacity(0.3),
+                  blurRadius: 4,
+                ),
+              ],
             ),
           ),
         ),

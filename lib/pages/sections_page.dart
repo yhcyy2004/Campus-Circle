@@ -5,6 +5,9 @@ import '../services/api_service.dart';
 import '../models/section_model.dart';
 import 'section_detail_page.dart';
 import 'create_section_page.dart';
+import '../theme/app_theme.dart';
+import '../widgets/app_widgets.dart';
+import '../animations/app_animations.dart';
 
 class SectionsPage extends StatefulWidget {
   @override
@@ -84,191 +87,268 @@ class _SectionsPageState extends State<SectionsPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text('讨论分区'),
-        backgroundColor: Color(0xFF4A90E2),
-        elevation: 0,
-        actions: [
-          IconButton(
-            icon: Icon(Icons.add),
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => CreateSectionPage()),
-              ).then((result) {
-                if (result == true) {
-                  _loadSections(); // 创建成功后重新加载
-                }
-              });
-            },
+      body: AppWidget.gradientBackground(
+        child: SafeArea(
+          child: Column(
+            children: [
+              // 自定义AppBar
+              _buildCustomAppBar(context),
+              
+              // 内容区域
+              Expanded(
+                child: RefreshIndicator(
+                  onRefresh: _loadSections,
+                  color: AppTheme.primaryColor,
+                  backgroundColor: AppTheme.cardBackground,
+                  child: _buildContent(),
+                ),
+              ),
+            ],
           ),
-        ],
+        ),
       ),
-      body: Column(
+      floatingActionButton: _buildFloatingActionButton(context),
+    );
+  }
+
+  Widget _buildCustomAppBar(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      child: Row(
         children: [
-          // 顶部装饰
-          Container(
-            height: 100,
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                colors: [Color(0xFF4A90E2), Color(0xFF357ABD)],
-                begin: Alignment.topCenter,
-                end: Alignment.bottomCenter,
-              ),
-            ),
-            child: Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text(
-                    '发现有趣的讨论区',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  SizedBox(height: 4),
-                  Text(
-                    '加入分区，参与讨论交流',
-                    style: TextStyle(
-                      color: Colors.white70,
-                      fontSize: 14,
-                    ),
-                  ),
-                ],
-              ),
-            ),
+          AppWidget.glowIcon(
+            icon: Icons.forum,
+            size: 32,
+            color: AppTheme.primaryColor,
           ),
+          const SizedBox(width: 12),
           Expanded(
-            child: RefreshIndicator(
-              onRefresh: _loadSections,
-              child: _buildContent(),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  '讨论分区',
+                  style: TextStyle(
+                    fontSize: 24,
+                    fontWeight: FontWeight.bold,
+                    color: AppTheme.textPrimary,
+                    shadows: [
+                      Shadow(
+                        color: AppTheme.primaryColor.withOpacity(0.3),
+                        blurRadius: 8,
+                      ),
+                    ],
+                  ),
+                ),
+                Text(
+                  '发现有趣的讨论社区',
+                  style: TextStyle(
+                    fontSize: 14,
+                    color: AppTheme.textSecondary,
+                  ),
+                ),
+              ],
             ),
           ),
         ],
       ),
+    );
+  }
+
+  Widget _buildFloatingActionButton(BuildContext context) {
+    return AppWidget.neonFAB(
+      icon: Icons.add,
+      onPressed: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => CreateSectionPage()),
+        ).then((result) {
+          if (result == true) {
+            _loadSections();
+          }
+        });
+      },
     );
   }
 
   Widget _buildContent() {
     if (isLoading) {
       return Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            CircularProgressIndicator(),
-            SizedBox(height: 16),
-            Text('加载中...', style: TextStyle(color: Colors.grey[600])),
-          ],
+        child: AppWidget.glassCard(
+          padding: const EdgeInsets.all(32),
+          margin: const EdgeInsets.all(24),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              CircularProgressIndicator(
+                valueColor: AlwaysStoppedAnimation<Color>(AppTheme.primaryColor),
+              ),
+              const SizedBox(height: 16),
+              Text(
+                '正在加载分区...',
+                style: TextStyle(
+                  color: AppTheme.textSecondary,
+                  fontSize: 16,
+                ),
+              ),
+            ],
+          ),
         ),
       );
     }
 
     if (errorMessage.isNotEmpty) {
       return Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(Icons.error_outline, size: 64, color: Colors.grey[400]),
-            SizedBox(height: 16),
-            Text(
-              errorMessage,
-              style: TextStyle(color: Colors.grey[600]),
-              textAlign: TextAlign.center,
-            ),
-            SizedBox(height: 16),
-            ElevatedButton(
-              onPressed: _loadSections,
-              child: Text('重试'),
-            ),
-          ],
+        child: AppWidget.glassCard(
+          padding: const EdgeInsets.all(24),
+          margin: const EdgeInsets.all(24),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(
+                Icons.error_outline,
+                size: 64,
+                color: AppTheme.accentSecondary,
+              ),
+              const SizedBox(height: 16),
+              Text(
+                '加载失败',
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: AppTheme.textPrimary,
+                ),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                errorMessage,
+                style: TextStyle(
+                  color: AppTheme.textSecondary,
+                ),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 16),
+              AppWidget.gradientButton(
+                text: '重试',
+                onPressed: _loadSections,
+                height: 40,
+              ),
+            ],
+          ),
         ),
       );
     }
 
     if (sections.isEmpty) {
       return Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(Icons.forum_outlined, size: 64, color: Colors.grey[400]),
-            SizedBox(height: 16),
-            Text(
-              '还没有分区',
-              style: TextStyle(fontSize: 18, color: Colors.grey[600]),
-            ),
-            SizedBox(height: 8),
-            Text(
-              '快来创建第一个分区吧！',
-              style: TextStyle(color: Colors.grey[500]),
-            ),
-            SizedBox(height: 16),
-            ElevatedButton.icon(
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => CreateSectionPage()),
-                ).then((result) {
-                  if (result == true) {
-                    _loadSections();
-                  }
-                });
-              },
-              icon: Icon(Icons.add),
-              label: Text('创建分区'),
-            ),
-          ],
+        child: AppWidget.glassCard(
+          padding: const EdgeInsets.all(32),
+          margin: const EdgeInsets.all(24),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              AppWidget.glowIcon(
+                icon: Icons.forum_outlined,
+                size: 64,
+                color: AppTheme.primaryColor,
+              ),
+              const SizedBox(height: 20),
+              Text(
+                '暂无分区',
+                style: TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                  color: AppTheme.textPrimary,
+                ),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                '成为第一个创建分区的人吧！',
+                style: TextStyle(
+                  color: AppTheme.textSecondary,
+                ),
+              ),
+              const SizedBox(height: 20),
+              AppWidget.gradientButton(
+                text: '创建分区',
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => CreateSectionPage()),
+                  ).then((result) {
+                    if (result == true) {
+                      _loadSections();
+                    }
+                  });
+                },
+                height: 44,
+              ),
+            ],
+          ),
         ),
       );
     }
 
     return ListView.builder(
-      padding: EdgeInsets.all(16),
+      padding: const EdgeInsets.all(16),
       itemCount: sections.length,
       itemBuilder: (context, index) {
-        final section = sections[index];
-        return _buildSectionCard(section);
+        return AppAnimations.listItemAnimation(
+          index: index,
+          child: _buildSectionCard(sections[index]),
+        );
       },
     );
   }
 
   Widget _buildSectionCard(Section section) {
-    return Card(
-      elevation: 2,
-      margin: EdgeInsets.only(bottom: 12),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      child: InkWell(
-        onTap: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) => SectionDetailPage(sectionId: section.id),
-            ),
-          );
-        },
-        borderRadius: BorderRadius.circular(12),
-        child: Padding(
-          padding: EdgeInsets.all(16),
+    return Container(
+      margin: const EdgeInsets.only(bottom: 16),
+      child: AppWidget.glassCard(
+        padding: const EdgeInsets.all(20),
+        child: InkWell(
+          onTap: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => SectionDetailPage(sectionId: section.id),
+              ),
+            );
+          },
+          borderRadius: BorderRadius.circular(16),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Row(
                 children: [
+                  // 图标容器
                   Container(
-                    width: 48,
-                    height: 48,
+                    width: 60,
+                    height: 60,
                     decoration: BoxDecoration(
-                      color: _parseColor(section.color),
-                      borderRadius: BorderRadius.circular(8),
+                      gradient: LinearGradient(
+                        colors: [
+                          _parseColor(section.color),
+                          _parseColor(section.color).withOpacity(0.7),
+                        ],
+                      ),
+                      borderRadius: BorderRadius.circular(16),
+                      boxShadow: [
+                        BoxShadow(
+                          color: _parseColor(section.color).withOpacity(0.3),
+                          blurRadius: 12,
+                          spreadRadius: 2,
+                        ),
+                      ],
                     ),
                     child: Icon(
                       _getIconByName(section.icon),
                       color: Colors.white,
-                      size: 24,
+                      size: 28,
                     ),
                   ),
-                  SizedBox(width: 12),
+                  const SizedBox(width: 16),
+                  // 标题和创建者
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -278,55 +358,100 @@ class _SectionsPageState extends State<SectionsPage> {
                           style: TextStyle(
                             fontSize: 18,
                             fontWeight: FontWeight.bold,
-                            color: Colors.grey[800],
+                            color: AppTheme.textPrimary,
                           ),
                         ),
-                        SizedBox(height: 4),
-                        Text(
-                          '创建者：${section.creatorName ?? '未知'}',
-                          style: TextStyle(
-                            fontSize: 12,
-                            color: Colors.grey[500],
-                          ),
+                        const SizedBox(height: 4),
+                        Row(
+                          children: [
+                            Icon(
+                              Icons.person_outline,
+                              size: 14,
+                              color: AppTheme.textTertiary,
+                            ),
+                            const SizedBox(width: 4),
+                            Text(
+                              section.creatorName ?? '未知',
+                              style: TextStyle(
+                                fontSize: 12,
+                                color: AppTheme.textTertiary,
+                              ),
+                            ),
+                          ],
                         ),
                       ],
                     ),
                   ),
+                  // 加入按钮
+                  Container(
+                    decoration: BoxDecoration(
+                      gradient: AppTheme.primaryGradient,
+                      borderRadius: BorderRadius.circular(8),
+                      boxShadow: [
+                        BoxShadow(
+                          color: AppTheme.primaryColor.withOpacity(0.3),
+                          blurRadius: 8,
+                          spreadRadius: 1,
+                        ),
+                      ],
+                    ),
+                    child: Material(
+                      color: Colors.transparent,
+                      child: InkWell(
+                        onTap: () => _joinSection(section.id),
+                        borderRadius: BorderRadius.circular(8),
+                        child: const Padding(
+                          padding: EdgeInsets.symmetric(
+                            horizontal: 16,
+                            vertical: 8,
+                          ),
+                          child: Text(
+                            '加入',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 14,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
                 ],
               ),
+              
+              // 描述
               if (section.description?.isNotEmpty == true) ...[
-                SizedBox(height: 12),
+                const SizedBox(height: 16),
                 Text(
                   section.description!,
                   style: TextStyle(
                     fontSize: 14,
-                    color: Colors.grey[600],
+                    color: AppTheme.textSecondary,
+                    height: 1.4,
                   ),
-                  maxLines: 2,
+                  maxLines: 3,
                   overflow: TextOverflow.ellipsis,
                 ),
               ],
-              SizedBox(height: 12),
+              
+              const SizedBox(height: 16),
+              
+              // 统计信息
               Row(
                 children: [
                   _buildStatChip(
                     icon: Icons.people_outline,
-                    label: '${section.memberCount}人',
-                    color: Colors.blue,
+                    label: '${section.memberCount}',
+                    subtitle: '成员',
+                    color: AppTheme.primaryColor,
                   ),
-                  SizedBox(width: 8),
+                  const SizedBox(width: 12),
                   _buildStatChip(
                     icon: Icons.article_outlined,
-                    label: '${section.postCount}帖',
-                    color: Colors.green,
-                  ),
-                  Spacer(),
-                  TextButton(
-                    onPressed: () => _joinSection(section.id),
-                    child: Text('加入'),
-                    style: TextButton.styleFrom(
-                      foregroundColor: _parseColor(section.color),
-                    ),
+                    label: '${section.postCount}',
+                    subtitle: '帖子',
+                    color: AppTheme.accentColor,
                   ),
                 ],
               ),
@@ -340,26 +465,49 @@ class _SectionsPageState extends State<SectionsPage> {
   Widget _buildStatChip({
     required IconData icon,
     required String label,
+    required String subtitle,
     required Color color,
   }) {
     return Container(
-      padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.1),
+        gradient: LinearGradient(
+          colors: [
+            color.withOpacity(0.2),
+            color.withOpacity(0.1),
+          ],
+        ),
         borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: color.withOpacity(0.3),
+          width: 1,
+        ),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(icon, size: 14, color: color),
-          SizedBox(width: 4),
-          Text(
-            label,
-            style: TextStyle(
-              fontSize: 12,
-              color: color,
-              fontWeight: FontWeight.w500,
-            ),
+          Icon(icon, size: 16, color: color),
+          const SizedBox(width: 6),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                label,
+                style: TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.bold,
+                  color: color,
+                ),
+              ),
+              Text(
+                subtitle,
+                style: TextStyle(
+                  fontSize: 10,
+                  color: color.withOpacity(0.8),
+                ),
+              ),
+            ],
           ),
         ],
       ),
@@ -370,7 +518,7 @@ class _SectionsPageState extends State<SectionsPage> {
     try {
       return Color(int.parse(colorString.replaceFirst('#', ''), radix: 16) + 0xFF000000);
     } catch (e) {
-      return Color(0xFF4A90E2); // 默认蓝色
+      return AppTheme.primaryColor; // 使用主题色作为默认色
     }
   }
 
